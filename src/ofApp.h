@@ -6,6 +6,11 @@
 #include "FaceAverage.h"
 #include "ofxIO.h"
 #include "ofxFaceTracker.h"
+#include "ofxOsc.h"
+
+#ifdef TARGET_OSX
+    #include "ofxSyphon.h"
+#endif
 
 class ofApp : public ofBaseApp{
 
@@ -33,19 +38,23 @@ class ofApp : public ofBaseApp{
         void onDirectoryWatcherItemMovedTo(const ofxIO::DirectoryWatcherManager::DirectoryEvent& evt);
         void onDirectoryWatcherError(const Poco::Exception& exc);
 
-
         bool calculatePoints(int i);
         void readImages(int i);
         bool getNextMorph();
-
+        void setupSyphon();
+        void updateSyphonImages();
+    
         vector<vector<cv::Point2f> > allPoints;
         vector<cv::Mat> cvimages;
         ofImage ofimages[2];
         queue<ofImage> carousel;
         queue<string> newImages;
+    
         int out_width, out_height;
+        int small_width, small_height;
         float aspectRatio;
         ofImage finalImage;
+        bool bRunning;
     
         ofxFaceTracker faceTracker;
         string dirname;
@@ -53,7 +62,22 @@ class ofApp : public ofBaseApp{
         /* images */
         ofImage face1,face2;
     
-
+        /* Fonts */
+        ofTrueTypeFont  font,smallfont;
+    
+        /* File watcher */
         ofxIO::DirectoryWatcherManager watcher;
         ofxIO::FileExtensionFilter fileFilter; // an example file filter
+    
+        /* Osc */
+		ofxOscSender oscSender;
+        int port;
+        string hostname;
+    
+        /* Syphon */
+#ifdef TARGET_OSX
+        	ofxSyphonServer leftPortrait;
+            ofxSyphonServer mainPortrait;
+        	ofxSyphonServer rightPortrait;
+#endif
 };

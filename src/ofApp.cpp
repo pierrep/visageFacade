@@ -3,14 +3,27 @@
 
 //--------------------------------------------------------------
 void ofApp::setup(){
+	ofSetWindowTitle("Visage Facade");
+    
+    font.load("fonts/Gotham-Medium.otf", 20);
+    smallfont.load("fonts/Gotham-Medium.otf", 14);
+    
+    port = 12345;
+    hostname = "localhost";
+    oscSender.setup(hostname, port);
+    
     aspectRatio = 1.21875f;
     out_width = 720;
     out_height = out_width * aspectRatio;
+    small_width = 400;
+    small_height = 400;
 
     faceTracker.setup();
     faceTracker.setIterations(15);
     faceTracker.setAttempts(5);
     faceTracker.setTolerance(1);
+    
+    setupSyphon();
     
     /* directory watcher */
     watcher.registerAllEvents(this);
@@ -18,14 +31,16 @@ void ofApp::setup(){
     bool listExistingItemsOnStart = true;
     bool sortAlphaNumeric = false;
     fileFilter.addExtension(".jpg");
+    fileFilter.addExtension(".png");    
     watcher.addPath(folderToWatch, listExistingItemsOnStart, sortAlphaNumeric, &fileFilter);
 
     dirname = "faces";
     
     ofDirectory dir;
     dir.allowExt("jpg");
+    dir.allowExt("png");
     dir.listDir(dirname);
-    dir.sort();
+    //dir.sort();
 
     for(int i = 0; i < dir.size();i++)
     {
@@ -57,15 +72,21 @@ void ofApp::draw(){
 
 
     if (ofimages[0].isAllocated()) {
-        ofimages[0].draw(ofGetWidth()/2,0,300,300*aspectRatio);
+        ofimages[0].draw(ofGetWidth()/2,10,small_width,small_height);
+        font.drawString("LEFT PORTRAIT", ofGetWidth()/2,small_height+50);
     }
     if (ofimages[1].isAllocated()) {
-        ofimages[1].draw(ofGetWidth()/2+300+10,0,300,300*aspectRatio);
+        ofimages[1].draw(ofGetWidth()/2+small_width+10,10,small_width,small_height);
+        font.drawString("RIGHT PORTRAIT", ofGetWidth()/2+small_width+10,small_height+50);
     }
 
     if (finalImage.isAllocated()) {
-    finalImage.draw(0,ofGetHeight()-finalImage.getHeight());
+    finalImage.draw(10,10);
     }
+    
+    smallfont.drawString("Port: "+ofToString(port)+ "  Host: "+hostname+"  /newmorph",ofGetWidth()/2, ofGetHeight()-30);
+    
+    updateSyphonImages();
  
 }
 
@@ -129,13 +150,13 @@ bool ofApp::calculatePoints(int i)
 //--------------------------------------------------------------
 bool ofApp::getNextMorph()
 {
-    ofimages[0] = carousel.front();
-    ofimages[0].update();
+    ofimages[1] = carousel.front();
+    ofimages[1].update();
     carousel.push(carousel.front());
     carousel.pop();
 
-    ofimages[1] = carousel.front();
-    ofimages[1].update();
+    ofimages[0] = carousel.front();
+    ofimages[0].update();
     //carousel.push(carousel.front());
     //carousel.pop();
 
@@ -160,6 +181,12 @@ bool ofApp::getNextMorph()
 
     cvimages.clear();
     allPoints.clear();
+    
+    /* Notify of new morph */
+    ofxOscMessage m;
+    m.setAddress("/newmorph");
+    m.addBoolArg(true);
+    oscSender.sendMessage(m, false);
 
     return true;
 }
@@ -209,6 +236,28 @@ void ofApp::onDirectoryWatcherItemMovedTo(const ofxIO::DirectoryWatcherManager::
 void ofApp::onDirectoryWatcherError(const Poco::Exception& exc)
 {
     ofLogError("ofApp::onDirectoryWatcherError") << "Error: " << exc.displayText();
+}
+
+//--------------------------------------------------------------
+void ofApp::updateSyphonImages()
+{
+#ifdef TARGET_OSX
+    if (ofimages[0].isAllocated()) leftPortrait.publishTexture(&(ofimages[0].getTexture()));
+    
+    if (ofimages[1].isAllocated()) rightPortrait.publishTexture(&(ofimages[1].getTexture()));
+    
+    if (finalImage.isAllocated()) mainPortrait.publishTexture(&(finalImage.getTexture()));
+#endif
+}
+
+//--------------------------------------------------------------
+void ofApp::setupSyphon()
+{
+#ifdef TARGET_OSX
+    leftPortrait.setName("Left Portrait");
+    rightPortrait.setName("Right Portrait");
+    mainPortrait.setName("Main Portrait");
+#endif
 }
 
 //--------------------------------------------------------------

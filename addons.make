@@ -1,5 +1,7 @@
 ofxCv
 ofxFaceTracker
-ofxOpenCv
-ofxJSON
 ofxIO
+ofxJSON
+ofxOpenCv
+ofxOsc
+ofxSyphon
