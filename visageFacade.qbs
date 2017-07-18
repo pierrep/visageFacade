@@ -24,7 +24,8 @@ Project{
             'ofxFaceTracker',
             'ofxOpenCv',
             'ofxIO',
-            'ofxJSON',            
+            'ofxJSON',
+            'ofxOsc',
         ]
 
         // additional flags for the project. the of module sets some
