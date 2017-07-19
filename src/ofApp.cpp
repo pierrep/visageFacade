@@ -47,7 +47,7 @@ void ofApp::setup(){
         ofImage img;
         img.load(dir.getPath(i));
         img.update();
-        carousel.push(img);
+        carousel.push_back(img);
     }
 
     getNextMorph();
@@ -61,7 +61,7 @@ void ofApp::update(){
         ofImage img;
         img.load(newImages.front());
         img.update();
-        carousel.push(img);
+        carousel.push_back(img);
         newImages.pop();
         ofLogNotice() << "Added new image";
     }
@@ -82,6 +82,13 @@ void ofApp::draw(){
 
     if (finalImage.isAllocated()) {
     finalImage.draw(10,10);
+    }
+
+    /* draw carousel */
+    int i = 0;
+    for (std::list<ofImage>::iterator it = carousel.begin(); it != carousel.end(); it++) {
+        (*it).draw(ofGetWidth()/2+(i%16)*50, 500+(i/16)*50,50,50);
+        i++;;
     }
     
     smallfont.drawString("Port: "+ofToString(port)+ "  Host: "+hostname+"  /newmorph",ofGetWidth()/2, ofGetHeight()-30);
@@ -152,13 +159,11 @@ bool ofApp::getNextMorph()
 {
     ofimages[1] = carousel.front();
     ofimages[1].update();
-    carousel.push(carousel.front());
-    carousel.pop();
+    carousel.push_back(carousel.front());
+    carousel.pop_front();
 
     ofimages[0] = carousel.front();
     ofimages[0].update();
-    //carousel.push(carousel.front());
-    //carousel.pop();
 
     finalImage.clear();
 

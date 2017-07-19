@@ -47,7 +47,7 @@ class ofApp : public ofBaseApp{
         vector<vector<cv::Point2f> > allPoints;
         vector<cv::Mat> cvimages;
         ofImage ofimages[2];
-        queue<ofImage> carousel;
+        list<ofImage> carousel;
         queue<string> newImages;
     
         int out_width, out_height;

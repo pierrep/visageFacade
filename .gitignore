@@ -2,5 +2,8 @@ obj/
 bin/visageFacade.app/
 bin/visageFacade_debug
 visageFacade.qbs.user
+bin/data/faces
+bin/libs/
+bin/visageFacade
 
 
