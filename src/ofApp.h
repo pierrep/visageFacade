@@ -12,6 +12,12 @@
     #include "ofxSyphon.h"
 #endif
 
+class CarouselImage {
+public:
+    ofImage img;
+    string name;
+};
+
 class ofApp : public ofBaseApp{
 
 	public:
@@ -39,7 +45,6 @@ class ofApp : public ofBaseApp{
         void onDirectoryWatcherError(const Poco::Exception& exc);
 
         bool calculatePoints(int i);
-        void readImages(int i);
         bool getNextMorph();
         void setupSyphon();
         void updateSyphonImages();
@@ -47,8 +52,9 @@ class ofApp : public ofBaseApp{
         vector<vector<cv::Point2f> > allPoints;
         vector<cv::Mat> cvimages;
         ofImage ofimages[2];
-        list<ofImage> carousel;
-        queue<string> newImages;
+        list<CarouselImage> carousel;
+        queue<string> imagesToAdd;
+        queue<string> imagesToRemove;
     
         int out_width, out_height;
         int small_width, small_height;

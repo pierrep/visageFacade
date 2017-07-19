@@ -47,7 +47,10 @@ void ofApp::setup(){
         ofImage img;
         img.load(dir.getPath(i));
         img.update();
-        carousel.push_back(img);
+        CarouselImage c;
+        c.name = dir.getPath(i);
+        c.img = img;
+        carousel.push_back(c);
     }
 
     getNextMorph();
@@ -57,12 +60,16 @@ void ofApp::setup(){
 //--------------------------------------------------------------
 void ofApp::update(){
 
-    if(newImages.size() > 0 ){
+    if(imagesToAdd.size() > 0 ){
         ofImage img;
-        img.load(newImages.front());
+        img.load(imagesToAdd.front());
         img.update();
-        carousel.push_back(img);
-        newImages.pop();
+        CarouselImage c;
+        c.name = imagesToAdd.front();
+        c.img = img;
+
+        carousel.push_back(c);
+        imagesToAdd.pop();
         ofLogNotice() << "Added new image";
     }
 }
@@ -86,8 +93,8 @@ void ofApp::draw(){
 
     /* draw carousel */
     int i = 0;
-    for (std::list<ofImage>::iterator it = carousel.begin(); it != carousel.end(); it++) {
-        (*it).draw(ofGetWidth()/2+(i%16)*50, 500+(i/16)*50,50,50);
+    for (std::list<CarouselImage>::iterator it = carousel.begin(); it != carousel.end(); it++) {
+        (*it).img.draw(ofGetWidth()/2+(i%16)*50, 500+(i/16)*50,50,50);
         i++;;
     }
     
@@ -98,28 +105,16 @@ void ofApp::draw(){
 }
 
 //--------------------------------------------------------------
-void ofApp::readImages(int i)
+bool ofApp::calculatePoints(int i)
 {
-
     cv::Mat img = ofxCv::toCv(ofimages[i]).clone();
-
     img.convertTo(img, CV_32FC3, 1.0);
-
-    if(!img.data)
-    {
+    if(!img.data) {
         cout << "image not read properly" << endl;
-    }
-    else
-    {
+    } else {
         cvimages.push_back(img);
     }
 
-}
-
-//--------------------------------------------------------------
-bool ofApp::calculatePoints(int i)
-{
-        
     faceTracker.reset();
     faceTracker.update(ofxCv::toCv(ofimages[i]));
 
@@ -157,12 +152,12 @@ bool ofApp::calculatePoints(int i)
 //--------------------------------------------------------------
 bool ofApp::getNextMorph()
 {
-    ofimages[1] = carousel.front();
+    ofimages[1] = carousel.front().img;
     ofimages[1].update();
     carousel.push_back(carousel.front());
     carousel.pop_front();
 
-    ofimages[0] = carousel.front();
+    ofimages[0] = carousel.front().img;
     ofimages[0].update();
 
     finalImage.clear();
@@ -170,10 +165,7 @@ bool ofApp::getNextMorph()
     bool fail1 = false;
     bool fail2 = false;
 
-    readImages(0);
     fail1 = calculatePoints(0);
-
-    readImages(1);
     fail2 = calculatePoints(1);
 
     if(!fail1 || !fail2) {
@@ -210,13 +202,14 @@ void ofApp::keyPressed(int key){
 void ofApp::onDirectoryWatcherItemAdded(const ofxIO::DirectoryWatcherManager::DirectoryEvent& evt)
 {
     ofLogNotice() << "Added:    " << evt.item.path();
-    newImages.push(evt.item.path());
+    imagesToAdd.push(evt.item.path());
 }
 
 //--------------------------------------------------------------
 void ofApp::onDirectoryWatcherItemRemoved(const ofxIO::DirectoryWatcherManager::DirectoryEvent& evt)
 {
     ofLogNotice() << "Removed:    " << evt.item.path();
+    imagesToRemove.push(evt.item.path());
 }
 
 //--------------------------------------------------------------
