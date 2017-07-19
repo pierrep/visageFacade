@@ -51,10 +51,9 @@ void ofApp::setup(){
         img.load(dir.getPath(i));
         img.update();
         CarouselImage c;
-        c.name = dir.getPath(i);
+        c.name = dir.getAbsolutePath() + '/' + dir.getName(i);
         c.img = img;
         carousel.push_back(c);
-        ofLogNotice() << "carousel.size = " << carousel.size();
     }
 
     getNextMorph();
@@ -78,6 +77,26 @@ void ofApp::update(){
         ofLogNotice() << "Added new image";
     }
     
+    if(imagesToRemove.size() > 0 ){
+        string name = imagesToRemove.front();
+        ofLogNotice() << "Trying to remove " << name;
+
+        int i = 0;
+        for (std::list<CarouselImage>::iterator itr = carousel.begin(); itr != carousel.end(); itr++) {
+            if((i != 0) && (i != 1)) {
+                //ofLogNotice() << "Comparing with " << (*itr).name;
+                if( (*itr).name == name){
+                    carousel.erase(itr);
+                    imagesToRemove.pop();
+                    ofLogNotice() << "Removed image";
+                    break;
+                }
+            }
+            i++;
+        }
+
+    }
+
     if(curTime-prevTime > slideChangeTime) {
         curTime = prevTime = ofGetElapsedTimeMillis();
         getNextMorph();
@@ -131,7 +150,6 @@ bool ofApp::calculatePoints(int i)
     int faceWidth = ofimages[i].getWidth();
     int faceHeight = ofimages[i].getHeight();
     if(!faceTracker.getFound()) {
-        ofLogNotice() << "FaceTracker didn't find a face! No points.";
         return false;
     } else {
         ofPolyline p1 = faceTracker.getImageFeature(ofxFaceTracker::LEFT_EYE);
@@ -234,6 +252,7 @@ void ofApp::onDirectoryWatcherItemModified(const ofxIO::DirectoryWatcherManager:
 void ofApp::onDirectoryWatcherItemMovedFrom(const ofxIO::DirectoryWatcherManager::DirectoryEvent& evt)
 {
     ofLogNotice("ofApp::onDirectoryWatcherItemMovedFrom") << "Moved From: " << evt.item.path();
+    imagesToRemove.push(evt.item.path());
 }
 
 //--------------------------------------------------------------
