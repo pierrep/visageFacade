@@ -17,7 +17,10 @@ void ofApp::setup(){
     out_height = out_width * aspectRatio;
     small_width = 400;
     small_height = 400;
-
+    
+    curTime = prevTime = ofGetElapsedTimeMillis();
+    slideChangeTime = 5000;
+    
     faceTracker.setup();
     faceTracker.setIterations(15);
     faceTracker.setAttempts(5);
@@ -51,6 +54,7 @@ void ofApp::setup(){
         c.name = dir.getPath(i);
         c.img = img;
         carousel.push_back(c);
+        ofLogNotice() << "carousel.size = " << carousel.size();
     }
 
     getNextMorph();
@@ -59,7 +63,8 @@ void ofApp::setup(){
 
 //--------------------------------------------------------------
 void ofApp::update(){
-
+    curTime = ofGetElapsedTimeMillis();
+    
     if(imagesToAdd.size() > 0 ){
         ofImage img;
         img.load(imagesToAdd.front());
@@ -72,11 +77,16 @@ void ofApp::update(){
         imagesToAdd.pop();
         ofLogNotice() << "Added new image";
     }
+    
+    if(curTime-prevTime > slideChangeTime) {
+        curTime = prevTime = ofGetElapsedTimeMillis();
+        getNextMorph();
+    }
 }
 
 //--------------------------------------------------------------
 void ofApp::draw(){
-
+    if(carousel.size() < 2) font.drawString("Not enough images loaded", 30, 30);
 
     if (ofimages[0].isAllocated()) {
         ofimages[0].draw(ofGetWidth()/2,10,small_width,small_height);
@@ -152,6 +162,8 @@ bool ofApp::calculatePoints(int i)
 //--------------------------------------------------------------
 bool ofApp::getNextMorph()
 {
+    if(carousel.size() < 2) return false;
+    
     ofimages[1] = carousel.front().img;
     ofimages[1].update();
     carousel.push_back(carousel.front());

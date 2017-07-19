@@ -61,6 +61,8 @@ class ofApp : public ofBaseApp{
         float aspectRatio;
         ofImage finalImage;
         bool bRunning;
+        float curTime,prevTime;
+        float slideChangeTime;
     
         ofxFaceTracker faceTracker;
         string dirname;
