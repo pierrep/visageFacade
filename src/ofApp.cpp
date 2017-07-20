@@ -30,14 +30,14 @@ void ofApp::setup(){
     
     /* directory watcher */
     watcher.registerAllEvents(this);
-    std::string folderToWatch = ofToDataPath("faces", true);
+    std::string folderToWatch = ofToDataPath("/Users/grimus/Dropbox/GSPF2017/faces", false);
     bool listExistingItemsOnStart = true;
     bool sortAlphaNumeric = false;
     fileFilter.addExtension(".jpg");
     fileFilter.addExtension(".png");    
     watcher.addPath(folderToWatch, listExistingItemsOnStart, sortAlphaNumeric, &fileFilter);
 
-    dirname = "faces";
+    dirname = "/Users/grimus/Dropbox/GSPF2017/faces";
     
     ofDirectory dir;
     dir.allowExt("jpg");
@@ -72,6 +72,12 @@ void ofApp::update(){
         c.name = imagesToAdd.front();
         c.img = img;
 
+        int i = 0;
+        for (std::list<CarouselImage>::iterator it = carousel.begin(); it != carousel.end(); it++) {
+            
+            i++;;
+        }
+        
         carousel.push_back(c);
         imagesToAdd.pop();
         ofLogNotice() << "Added new image";
