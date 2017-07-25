@@ -19,7 +19,7 @@ void ofApp::setup(){
     small_height = 400;
     
     curTime = prevTime = ofGetElapsedTimeMillis();
-    slideChangeTime = 5000;
+    slideChangeTime = 12000;
     
     faceTracker.setup();
     faceTracker.setIterations(15);
@@ -74,11 +74,13 @@ void ofApp::update(){
 
         int i = 0;
         for (std::list<CarouselImage>::iterator it = carousel.begin(); it != carousel.end(); it++) {
-            
+            if(i == 2) {
+                carousel.insert(it, c);
+            }
             i++;;
         }
         
-        carousel.push_back(c);
+        //carousel.push_back(c);
         imagesToAdd.pop();
         ofLogNotice() << "Added new image";
     }
